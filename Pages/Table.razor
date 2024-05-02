@@ -1,0 +1,40 @@
+﻿@page "/table"
+@inject HttpClient _http
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+
+<PageTitle>Table</PageTitle>
+
+<h1>Table</h1>
+
+@if (_allTables == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Capacity </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var table in _allTables)
+            {
+                <tr>
+                    <td>@table.Id.ToString()</td>
+                    <td>@table.Capacity</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    private TableDTO[]? _allTables;
+    protected override async Task OnInitializedAsync()
+    {
+        _allTables = await _http.GetFromJsonAsync<TableDTO[]>("table/Allitems");
+    }  
+}

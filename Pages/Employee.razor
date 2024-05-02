@@ -1,0 +1,49 @@
+﻿@page "/employee"
+@inject HttpClient _http
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+
+<PageTitle>Employee</PageTitle>
+
+<h1>Employee</h1>
+
+@if (_allEmployees == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>FirstName </th>
+                <th>LastName</th>
+                <th>Address</th>
+                <th>ContactInfo</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in _allEmployees)
+            {
+                <tr>
+                    <td>@employee.Id.ToString()</td>
+                    <td>@employee.FirstName</td>
+                    <td>@employee.LastName</td>
+                    <td>@employee.Address</td>
+                    <td>@employee.ContactInfo</td>
+                    <td>@employee.Responsibility</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    private EmployeeDTO[]? _allEmployees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _allEmployees = await _http.GetFromJsonAsync<EmployeeDTO[]>("employee/Allitems");
+    }  
+}

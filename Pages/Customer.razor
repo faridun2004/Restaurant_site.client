@@ -1,0 +1,47 @@
+﻿@page "/customer"
+@inject HttpClient _http
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+
+<PageTitle>Customer</PageTitle>
+
+<h1>Customer</h1>
+
+@if (_allCustomers == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>FirstName</th>
+                <th>LastName</th>
+                <th>Address</th>
+                <th>ContactInfo</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var customer in _allCustomers)
+            {
+                <tr>
+                    <td>@customer.Id.ToString()</td>
+                    <td>@customer.FirstName</td>
+                    <td>@customer.LastName</td>
+                    <td>@customer.Address</td>
+                    <td>@customer.ContactInfo</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    private CustomerDTO[]? _allCustomers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _allCustomers = await _http.GetFromJsonAsync<CustomerDTO[]>("customer/Allitems");
+    }  
+}
