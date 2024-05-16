@@ -1,0 +1,86 @@
+﻿@page "/table"
+@inject IHttpAPIProvider _apiProvider
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@using Restaurant_site.client.Services
+@inject NavigationManager _navigationManager
+
+<PageTitle>Table</PageTitle>
+<body>
+<h1>Table</h1>
+<div class="row" >
+    <div class="col-md-6">
+        <a href='/table/add' class="btn btn-primary" role="button">
+            <i class="fas fa-user-plus"></i>
+            Add Tables
+        </a>
+    </div>
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search product by name and by Description"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterTables" />
+    </div>
+</div>
+
+@if (_allTables == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Capacity </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var table in _filteredTables)
+            {
+                <tr>
+                    <td>@table.Id.ToString()</td>
+                    <td>@table.Capacity</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditItem(table.Id)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteItem(table.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+}
+</body>
+@code {
+    protected string SearchString { get; set; } = string.Empty;
+    private TableDTO[]? _allTables;
+    private TableDTO[]? _filteredTables;
+    protected override async Task OnInitializedAsync()
+    {
+        (bool isSuccessStatusCode, _allTables, string message) = await _apiProvider.GetAsync<TableDTO[]>("table/Allitems");
+        SearchString = string.Empty;
+        FilterTables();
+    }  
+    private async Task DeleteItem(Guid id)
+    {
+        (bool isSuccessStatusCode, _, string message) = await _apiProvider.DeleteAsync<string>($"table?Id={id}");
+        await OnInitializedAsync(); 
+    }
+    private void EditItem(Guid id)
+    {
+        _navigationManager.NavigateTo($"/table/edit/{id}", true);
+    }
+    protected void FilterTables()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            _filteredTables = _allTables.Where(p => p.Capacity.Contains(SearchString))
+            .ToArray();
+        }
+        else
+        {
+            _filteredTables = _allTables;
+        }
+    }
+}

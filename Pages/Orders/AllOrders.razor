@@ -1,0 +1,83 @@
+﻿@page "/order"
+@inject IHttpAPIProvider _apiProvider
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@using Restaurant_site.client.Services
+@inject NavigationManager _navigationManager
+
+<PageTitle>Orders</PageTitle>
+
+<h1>Products</h1>
+<div class="row">
+    <div class="col-md-6">
+        <a href='/order/add' class="btn btn-primary" role="button">
+            <i class="fas fa-user-plus"></i>
+            Add Order
+        </a>
+    </div>
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search product by name and by Description"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterOrders" />
+    </div>
+</div>
+@if (_allOrders == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>OrderDetails </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in _filteredOrders)
+            {
+                <tr>
+                    <td>@order.Id.ToString()</td>
+                    <td>@order.OrderDetails</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditItem(order.Id)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteItem(order.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    protected string SearchString { get; set; } = string.Empty;
+    private OrderDTO[]? _allOrders;
+    private OrderDTO[]? _filteredOrders;
+    protected override async Task OnInitializedAsync()
+    {
+        (bool isSuccessStatusCode, _allOrders, string message) = await _apiProvider.GetAsync<OrderDTO[]>("order/Allitems");
+        SearchString = string.Empty;
+        FilterOrders();
+    }
+    private async Task DeleteItem(Guid id)
+    {
+        (bool isSuccessStatusCode, _, string message) = await _apiProvider.DeleteAsync<string>($"order?Id={id}");
+        await OnInitializedAsync();   // Refresh the list
+    }
+    private void EditItem(Guid id)
+    {
+        _navigationManager.NavigateTo($"/order/edit/{id}", true);
+    }
+
+    protected void FilterOrders()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            _filteredOrders = _allOrders.Where(p => p.Id.ToString().Contains(SearchString))
+            .ToArray();
+        }
+        else
+        {
+            _filteredOrders = _allOrders;
+        }
+    }
+}

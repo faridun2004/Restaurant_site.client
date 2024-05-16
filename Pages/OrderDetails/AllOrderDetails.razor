@@ -1,0 +1,92 @@
+﻿@page "/orderDetails"
+@inject HttpClient _http
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@inject NavigationManager _navigationManager
+
+<PageTitle>Orders</PageTitle>
+
+<h1>Orders</h1>
+<div class="row">
+    <div class="col-md-6">
+        <a href='/orderDetails/add' class="btn btn-primary" role="button">
+            <i class="fas fa-user-plus"></i>
+            Add Product
+        </a>
+    </div>
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search product by name and by Description"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterOrders" />
+    </div>
+</div>
+@if (_allOrderDetails == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Products</th>
+                <th>Customers</th>
+                <th>Employees</th>
+                <th>Tables</th>
+                <th>Orders</th>
+                <th>Quantity</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in _filteredOrders)
+            {
+                <tr>
+                    <td>@order.Id.ToString()</td>
+                    <td>@order.Product</td>
+                    <td>@order.Customer</td>
+                    <td>@order.Employee</td>
+                    <td>@order.Table</td>
+                    <td>@order.Order</td>
+                    <td>@order.Quantity</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditItem(order.Id)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteItem(order.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    protected string SearchString { get; set; } = string.Empty;
+    private OrderDetailDTO[]? _allOrderDetails;
+    private OrderDetailDTO[]? _filteredOrders;
+    protected override async Task OnInitializedAsync()
+    {
+        _allOrderDetails = await _http.GetFromJsonAsync<OrderDetailDTO[]>("orderDetails/Allitems");
+        SearchString = string.Empty;
+        FilterOrders();
+    }  
+    private async Task DeleteItem(Guid id)
+    {
+        await _http.DeleteAsync($"orderDetail?Id={id}");
+        await OnInitializedAsync(); // Refresh the list
+    }
+    private void EditItem(Guid id)
+    {
+        _navigationManager.NavigateTo($"/orderDetails/edit/{id}", true);
+    }
+    protected void FilterOrders()
+    {
+        // if (!string.IsNullOrEmpty(SearchString))
+        // {
+        //     _filteredOrders = _allOrders.Where(p => p..Contains(SearchString))
+        //     .ToArray();
+        // }
+        // else
+        // {
+        //     _filteredOrders = _allOrders;
+        // }
+    }
+}

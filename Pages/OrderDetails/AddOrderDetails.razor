@@ -1,0 +1,41 @@
+﻿@page "/orderDetails/add"
+@inject HttpClient _http
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@inject NavigationManager _navigationManager
+
+<PageTitle>Add Orders</PageTitle>
+
+<form>
+    <div class="form-group">
+        <label for="name">OrderDetails:</label>
+        <input id="name" class="form-control" @bind="@order.ProductId" required />
+    </div>
+    <div class="form-group">
+        <label for="name">OrderDetails:</label>
+        <input id="name" class="form-control" @bind="@order.CustomerId" required />
+    </div>
+    <div class="form-group">
+        <label for="name">OrderDetails:</label>
+        <input id="name" class="form-control" @bind="@order.EmployeeId" required />
+    </div>
+    <div class="form-group">
+        <label for="name">OrderDetails:</label>
+        <input id="name" class="form-control" @bind="@order.TableId" required />
+    </div>
+    <div class="form-group">
+        <label for="name">OrderDetails:</label>
+        <input id="name" class="form-control" @bind="@order.Quantity" required />
+    </div>
+    <br />
+    <button type="button" class="btn btn-primary" @onclick="AddOrderDetail">Add Orders</button>
+</form>
+
+@code {
+    OrderDetailDTO order = new OrderDetailDTO();
+    private async Task AddOrderDetail()
+    {
+        var createOrder = await _http.PostAsJsonAsync<OrderDetailDTO>("order", order);
+        _navigationManager.NavigateTo("/orderDetails");
+    }
+}

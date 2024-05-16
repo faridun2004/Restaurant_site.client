@@ -1,0 +1,42 @@
+﻿@page "/employee/add"
+@inject IHttpAPIProvider _apiProvider
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@using Restaurant_site.client.Services
+@inject NavigationManager _navigationManager
+
+<PageTitle>Add Employee</PageTitle>
+<link href="~/css//app.css" rel="stylesheet" />
+<form>
+    <div class="form-group">
+        <label for="name">First name:</label>
+        <input id="name" class="form-control" @bind="@employee.FirstName" required />
+    </div>
+    <div class="form-group">
+        <label for="number">Last name:</label>
+        <input id="number" class="form-control" @bind="@employee.LastName" required />
+    </div>
+    @* <div class="form-group">
+        <label for="name">Address:</label>
+        <input id="name" class="form-control" @bind="@employee.Address" required />
+    </div>
+    <div class="form-group">
+        <label for="name">ContactInfo:</label>
+        <input id="name" class="form-control" @bind="@employee.ContactInfo" required />
+    </div>
+    <div class="form-group">
+        <label for="name">Status: </label>
+        <input id="name" class="form-control" @bind="@employee.Responsibility" required />
+    </div> *@
+    <br />
+    <button type="button" class="btn btn-primary" @onclick="AddEmployees">Add Employees</button>
+</form>
+
+@code {
+    EmployeeDTO employee = new EmployeeDTO();
+    private async Task AddEmployees()
+    {
+        (bool isSuccessStatusCode, EmployeeDTO createClient, string message) = await _apiProvider.PostAsync<EmployeeDTO>("employee", employee);
+        _navigationManager.NavigateTo("/employee");
+    }
+}

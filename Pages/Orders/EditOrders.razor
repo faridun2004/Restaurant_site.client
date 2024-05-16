@@ -1,0 +1,41 @@
+﻿@page "/order/edit/{id}"
+@inject IHttpAPIProvider _apiProvider
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@using Restaurant_site.client.Services
+@inject NavigationManager _navigationManager
+
+<PageTitle>Edit Order</PageTitle>
+
+<h3>Edit Order</h3>
+@if (order == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <form>
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input id="name" class="form-control" @bind="@order.OrderDetails" required />
+        </div>
+        <button type="button" class="btn btn-primary" @onclick="EditOrder">Edit Order</button>
+    </form>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    OrderDTO order;
+
+    protected override async Task OnInitializedAsync()
+    {
+        (bool isSuccessStatusCode, order, string message) = await _apiProvider.GetAsync<OrderDTO>($"order/{Id}");
+    }
+    private async Task EditOrder()
+    {
+        (bool isSuccessStatusCode, string createClient, string message) = await _apiProvider.PutAsync<string>($"order/{Id}", order);
+        _navigationManager.NavigateTo("/order");
+    }
+}

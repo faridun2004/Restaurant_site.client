@@ -1,44 +1,63 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using Restaurant_site.client.Services
+@inject ITokenProvider tokenProvider
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Restaurant_site.client</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
+            <span class="navbar-toggler-icon">Х</span>
         </button>
     </div>
 </div>
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
+        
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="product">
+             <NavLink class="nav-link" href="productclient">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Products
+             </NavLink>
+        </div>
+        @if (tokenProvider.IsAuthenticated)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="product">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Products
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="customer">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Customers
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="employee">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Employees
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="table">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Tables
+                </NavLink>
+            </div
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="order">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Orders
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="orderDetails">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> OrderDetails
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="customer">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Customers
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="employee">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Employees
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="table">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Tables
-            </NavLink>
-        </div>
+        }
+        
     </nav>
 </div>
 

@@ -1,0 +1,54 @@
+﻿@page "/customer/edit/{id}"
+@inject IHttpAPIProvider _apiProvider
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@using Restaurant_site.client.Services
+@inject NavigationManager _navigationManager
+
+<PageTitle>Edit Customer</PageTitle>
+
+<h3>Edit Customer</h3>
+@if (customer == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <form>
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input id="name" class="form-control" @bind="@customer.FirstName" required />
+        </div>
+        <div class="form-group">
+            <label for="name">Description:</label>
+            <input id="name" class="form-control" @bind="@customer.LastName" required />
+        </div>
+        <div class="form-group">
+            <label for="name">Price:</label>
+            <input id="name" class="form-control" @bind="@customer.Address" required />
+        </div>
+        <div class="form-group">
+            <label for="name">Photo:</label>
+            <input id="name" class="form-control" @bind="@customer.ContactInfo" required />
+        </div>
+        <button type="button" class="btn btn-primary" @onclick="EditProducts">Edit Customers</button>
+    </form>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    CustomerDTO customer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        (bool isSuccessStatusCode, customer, string message) = await _apiProvider.GetAsync<CustomerDTO>($"customer/{Id}");
+    }
+
+    private async Task EditProducts()
+    {
+        (bool isSuccessStatusCode, string createClient, string message) = await _apiProvider.PutAsync<string>($"customer/{Id}", customer);
+        _navigationManager.NavigateTo("/customer");
+    }
+}

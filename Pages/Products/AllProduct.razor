@@ -1,0 +1,90 @@
+﻿@page "/product"
+@inject IHttpAPIProvider _apiProvider
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@using Restaurant_site.client.Services
+@inject NavigationManager _navigationManager
+
+<PageTitle>Products</PageTitle>
+
+<h1>Products</h1>
+<div class="row">
+    <div class="col-md-6">
+        <a href='/product/add' class="btn btn-primary" role="button">
+            <i class="fas fa-user-plus"></i>
+            Add Product
+        </a>
+    </div>
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search product by name and by Description"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterProducts" />
+    </div>
+</div>
+@if (_allProducts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name </th>
+                <th>Description.</th>
+                <th>Price</th>
+                <th>Photo</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in _filteredProducts)
+            {
+                <tr>
+                    <td>@product.Id.ToString()</td>
+                    <td>@product.Name</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price</td>
+                    <td>@product.Photo</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditItem(product.Id)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteItem(product.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    protected string SearchString { get; set; } = string.Empty;
+    private ProductDTO[]? _allProducts;
+    private ProductDTO[]? _filteredProducts;
+    protected override async Task OnInitializedAsync()
+    {
+        (bool isSuccessStatusCode, _allProducts, string message) = await _apiProvider.GetAsync<ProductDTO[]>("product/AllProducts");
+        SearchString = string.Empty;
+        FilterProducts();
+    }  
+    private async Task DeleteItem(Guid id)
+    {
+        (bool isSuccessStatusCode, _, string message) = await _apiProvider.DeleteAsync<string>($"product?ProductId={id}");
+        await OnInitializedAsync(); // Refresh the list
+    }
+    private void EditItem(Guid id)
+    {
+        _navigationManager.NavigateTo($"/product/edit/{id}", true);
+    }
+
+    protected void FilterProducts()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            _filteredProducts = _allProducts.Where(p => p.Name.Contains(SearchString) || p.Description.Contains(SearchString))
+            .ToArray();
+        }
+        else
+        {
+            _filteredProducts = _allProducts;
+        }
+    }
+}

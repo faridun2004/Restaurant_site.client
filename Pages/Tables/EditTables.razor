@@ -1,0 +1,41 @@
+﻿@page "/table/edit/{id}"
+@inject HttpClient _http
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@inject NavigationManager _navigationManager
+
+<PageTitle>Edit Tables</PageTitle>
+
+<h3>Edit Tables</h3>
+@if (table == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <form>
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input id="name" class="form-control" @bind="@table.Capacity" required />
+        </div>
+        <button type="button" class="btn btn-primary" @onclick="EditTable">Edit Product</button>
+    </form>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    TableDTO table;
+
+    protected override async Task OnInitializedAsync()
+    {
+        table = await _http.GetFromJsonAsync<TableDTO>($"table/{Id}");
+    }
+
+    private async Task EditTable()
+    {
+        var createClient = await _http.PutAsJsonAsync<TableDTO>($"table/{Id}", table);
+        _navigationManager.NavigateTo("/table");
+    }
+}

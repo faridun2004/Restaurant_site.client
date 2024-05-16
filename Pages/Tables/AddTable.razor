@@ -1,0 +1,25 @@
+﻿@page "/table/add"
+@inject HttpClient _http
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@inject NavigationManager _navigationManager
+
+<PageTitle>Add Table</PageTitle>
+
+<form>
+    <div class="form-group">
+        <label for="name">Capacity:</label>
+        <input id="name" class="form-control" @bind="@table.Capacity" required />
+    </div>
+    <br />
+    <button type="button" class="btn btn-primary" @onclick="AddTables">Add Tables</button>
+</form>
+
+@code {
+    TableDTO table = new TableDTO(); 
+    private async Task AddTables()
+    {
+        var createTables = await _http.PostAsJsonAsync<TableDTO>("table", table);
+        _navigationManager.NavigateTo("/table");
+    }
+}

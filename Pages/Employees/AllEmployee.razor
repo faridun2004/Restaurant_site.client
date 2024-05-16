@@ -1,0 +1,97 @@
+﻿@page "/employee"
+@attribute [Authorize]
+@inject IHttpAPIProvider _apiProvider
+@using Microsoft.AspNetCore.Authorization
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@using Restaurant_site.client.Services
+@inject NavigationManager _navigationManager
+
+<PageTitle>Employee</PageTitle>
+
+<h1>Employee</h1>
+<div class="row">
+    
+    <div class="col-md-6">
+        <a href='/employee/add' class="btn btn-primary" role="button" style="background-color:cornsilk; color:black">
+            <i class="fas fa-user-plus"></i>
+            Add Employees
+        </a>
+    </div>
+    
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search product by name and by Description"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterEmployees" />
+    </div>
+</div>
+
+@if (_allEmployees == null)
+{
+    <p><em>Loading...</em></p>
+}
+
+else
+{
+    <table class="employee">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>FirstName </th>
+                <th>LastName</th>
+                <th>Address</th>
+                <th>ContactInfo</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in _filteredEmployees)
+            {
+                <tr>
+                    <td>@employee.Id.ToString()</td>
+                    <td>@employee.FirstName</td>
+                    <td>@employee.LastName</td>
+                    <td>@employee.Address</td>
+                    <td>@employee.ContactInfo</td>
+                    <td>@employee.Responsibility</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditItem(employee.Id)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteItem(employee.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    protected string SearchString { get; set; } = string.Empty;
+    private EmployeeDTO[]? _allEmployees;
+    private EmployeeDTO[]? _filteredEmployees;
+    protected override async Task OnInitializedAsync()
+    {
+        (bool isSuccessStatusCode, _allEmployees, string message) = await _apiProvider.GetAsync<EmployeeDTO[]>("employee/AllEmployee");
+        SearchString = string.Empty;
+        FilterEmployees();
+    }
+    private async Task DeleteItem(Guid id)
+    {
+        (bool isSuccessStatusCode, _, string message) = await _apiProvider.DeleteAsync<string>($"employee?Id={id}");
+        await OnInitializedAsync(); // Refresh the list
+    }
+    private void EditItem(Guid id)
+    {
+        _navigationManager.NavigateTo($"/employee/edit/{id}", true);
+    }
+    protected void FilterEmployees()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            _filteredEmployees = _allEmployees.Where(p => p.FirstName.Contains(SearchString) || p.LastName.Contains(SearchString))
+            .ToArray();
+        }
+        else
+        {
+            _filteredEmployees =_allEmployees;
+        }
+    }
+}

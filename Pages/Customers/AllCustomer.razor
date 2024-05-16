@@ -1,0 +1,106 @@
+﻿@page "/customer"
+@attribute [Authorize(Roles ="admin")]
+@inject IHttpAPIProvider _apiProvider
+@using Microsoft.AspNetCore.Authorization
+@using Restaurant_site.client.DTO
+@using System.Net.Http.Json
+@using Restaurant_site.client.Services
+@inject NavigationManager _navigationManager
+
+<PageTitle>Customer</PageTitle>
+
+<h1>Customer</h1>
+<div class="row">
+    <div class="col-md-6">
+        <a href='/customer/add' class="btn btn-primary" role="button">
+            <i class="fas fa-user-plus"></i>
+            Add Customer
+        </a>
+    </div>
+    
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search user by name"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterCustomers" />
+        @if (SearchString.Length > 0)
+        {
+            <div class="input-group-append">
+                <button class="btn btn-danger" @onclick="ResetSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@if (_allCustomers == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>FirstName </th>
+                <th>LastName</th>
+                <th>Address</th>
+                <th>Contact</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var customer in _filteredCustomers)
+            {
+                <tr>
+                    <td>@customer.Id.ToString()</td>
+                    <td>@customer.FirstName</td>
+                    <td>@customer.LastName</td>
+                    <td>@customer.Address</td>
+                    <td>@customer.ContactInfo</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditItem(customer.Id)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteItem(customer.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    protected string SearchString { get; set; } = string.Empty;
+    private CustomerDTO[]? _allCustomers;
+    private CustomerDTO[]? _filteredCustomers;
+    protected override async Task OnInitializedAsync()
+    {
+        (bool isSuccessStatusCode, _allCustomers, string message) = await _apiProvider.GetAsync<CustomerDTO[]>("customer/Allitems");
+        SearchString = string.Empty;
+        FilterCustomers();
+    }
+    private async Task DeleteItem(Guid id)
+    {
+        (bool isSuccessStatusCode, _, string message) = await _apiProvider.DeleteAsync<string>($"customer?Id={id}");
+        await OnInitializedAsync();
+    }
+    private void EditItem(Guid id)
+    {
+        _navigationManager.NavigateTo($"/customer/edit/{id}", true);
+    }
+    protected void FilterCustomers()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            _filteredCustomers = _allCustomers.Where(p => p.FirstName.Contains(SearchString) ||
+            p.LastName.Contains(SearchString)).ToArray();
+        }
+        else
+        {
+            _filteredCustomers = _allCustomers;
+        }
+    }
+    public void ResetSearch()
+    {
+        SearchString = string.Empty;
+        _allCustomers = _filteredCustomers;
+    }
+}
