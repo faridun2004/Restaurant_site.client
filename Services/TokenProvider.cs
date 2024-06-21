@@ -1,92 +1,81 @@
 ﻿using Blazored.LocalStorage;
 using Newtonsoft.Json;
 using Restaurant_site.client.DTO;
-using Restaurant_site.client.Services;
+using System.Net.NetworkInformation;
 
-namespace BankManagementSystem.Client.Sevices;
-
-public class TokenProvider : ITokenProvider
+namespace Restaurant_site.client.Services
 {
-    readonly IServiceProvider _provider;
-    readonly ISyncLocalStorageService _localStorage;
-    public TokenProvider(IServiceProvider provider, ISyncLocalStorageService localStorage)
+    public class TokenProvider : ITokenProvider
     {
-        _provider = provider;
-        _localStorage = localStorage;
-        LoadTokenInfo();
-    }
-
-    public bool IsAuthenticated { get; set; }
-
-    bool IsTokenExpired => token == null || token.ExpireTime < DateTimeOffset.Now;
-
-    static TokenInfo token;
-    public string GetAccessToken()
-    {
-        if (IsTokenExpired && token is not null)
-            GetNewRefreshToken(token.RefreshToken);
-
-        return token?.AccessToken;
-    }
-
-    private IHttpAPIProvider GetHttpAPIProvider() =>
-        _provider.GetService<IHttpAPIProvider>();
-
-    public async Task<(bool IsAuthenticated, string message)> LoginAsync(LoginModel loginModel)
-    {
-        var (isSuccessStatusCode, tokenInfo, message) = await GetHttpAPIProvider().PostAsync<TokenInfo>($"Auth/Token?username={loginModel.Username}&password={loginModel.Password}");
-        UpdateTokenInfo(isSuccessStatusCode, tokenInfo);
-
-        Console.WriteLine($"Login successful: {isSuccessStatusCode}");
-        Console.WriteLine($"Token Info: {JsonConvert.SerializeObject(tokenInfo)}");
-
-        return (isSuccessStatusCode, message);
-    }
-
-    public void Logout()
-    {
-        UpdateTokenInfo(false);
-        Console.WriteLine("User logged out");
-    }
-
-    private void UpdateTokenInfo(bool successfullyAuthenticated, TokenInfo tokenInfo = null)
-    {
-        if (successfullyAuthenticated)
+        readonly IServiceProvider _provider;
+        readonly ISyncLocalStorageService _localStorage;
+        public TokenProvider(IServiceProvider provider, ISyncLocalStorageService localStorage)
         {
-            IsAuthenticated = true;
-            token = tokenInfo;
-
-            _localStorage.SetItem(nameof(TokenInfo), tokenInfo);
-            Console.WriteLine("Token info updated and saved to local storage");
+            _provider = provider;
+            _localStorage = localStorage;
+            LoadTokenInfo();
         }
-        else
+
+        public bool IsAuthenticated { get; set; }
+
+        bool IsTokenExpired => token == null || token.ExpireTime < DateTimeOffset.Now;
+
+        static TokenInfo token;
+        public string GetAccessToken()
         {
-            IsAuthenticated = false;
-            token = null;
+            if (IsTokenExpired && token is not null)
+                GetNewRefreshToken(token.RefreshToken);
 
-            _localStorage.RemoveItem(nameof(TokenInfo));
-            Console.WriteLine("Token info cleared from local storage");
+            return token?.AccessToken;
         }
-    }
 
+        private IHttpAPIProvider GetHttpAPIProvider() =>
+            _provider.GetService<IHttpAPIProvider>();
 
-    private void LoadTokenInfo()
-    {
-        if (_localStorage.ContainKey(nameof(TokenInfo)))
+        public async Task<(bool IsAuthenticated, string message)> LoginAsync(LoginModel loginModel)
         {
-            token = _localStorage.GetItem<TokenInfo>(nameof(TokenInfo));
-            IsAuthenticated = !IsTokenExpired;
-            Console.WriteLine($"Token loaded: {JsonConvert.SerializeObject(token)}");
-        }
-        else
-        {
-            Console.WriteLine("No token found in local storage");
-        }
-    }
+            (bool isSuccessStatusCode, TokenInfo tokenInfo, string message) = await GetHttpAPIProvider().PostAsync<TokenInfo>($"Auth/Token?username={loginModel.Username}&password={loginModel.Password}");
+            UpdateTokenInfo(isSuccessStatusCode, tokenInfo);
 
-    private void GetNewRefreshToken(string refreshToken)
-    {
-        (bool isSuccessStatusCode, TokenInfo tokenInfo, string message) = GetHttpAPIProvider().PostAsync<TokenInfo>($"Auth/RefreshToken?refreshToken={refreshToken}").GetAwaiter().GetResult();
-        UpdateTokenInfo(isSuccessStatusCode, tokenInfo);
+            return (isSuccessStatusCode, message);
+        }
+
+        public void Logout()
+        {
+            UpdateTokenInfo(false);
+        }
+
+        private void UpdateTokenInfo(bool successfullyAuthenticated, TokenInfo tokenInfo = null)
+        {
+            if (successfullyAuthenticated)
+            {
+                IsAuthenticated = true;
+                token = tokenInfo;
+
+                _localStorage.SetItem(nameof(TokenInfo), tokenInfo);
+            }
+            else
+            {
+                IsAuthenticated = false;
+                token = null;
+
+                _localStorage.RemoveItem(nameof(TokenInfo));
+            }
+        }
+
+        private void LoadTokenInfo()
+        {
+            if (_localStorage.ContainKey(nameof(TokenInfo)))
+            {
+                token = _localStorage.GetItem<TokenInfo>(nameof(TokenInfo));
+                IsAuthenticated = !IsTokenExpired;
+            }
+        }
+
+        private void GetNewRefreshToken(string refreshToken)
+        {
+            (bool isSuccessStatusCode, TokenInfo tokenInfo, string message) = GetHttpAPIProvider().PostAsync<TokenInfo>($"Auth/RefreshToken?refreshToken={refreshToken}").GetAwaiter().GetResult();
+            UpdateTokenInfo(isSuccessStatusCode, tokenInfo);
+        }
     }
 }

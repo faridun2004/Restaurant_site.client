@@ -23,7 +23,7 @@ else
             <label for="lastName">Last Name:</label>
             <input id="lastName" class="form-control" @bind="@employee.LastName" required />
         </div>
-       @*  <div class="form-group">
+        <div class="form-group">
             <label for="address">Address:</label>
             <input id="address" class="form-control" @bind="@employee.Address" required />
         </div>
@@ -34,7 +34,7 @@ else
         <div class="form-group">
             <label for="responsibility">Responsibility:</label>
             <input id="responsibility" class="form-control" @bind="@employee.Responsibility" required />
-        </div> *@
+        </div>
         <button type="button" class="btn btn-primary" @onclick="EditEmployees">Edit Employee</button>
     </form>
 }

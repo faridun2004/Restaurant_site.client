@@ -1,9 +1,29 @@
 ﻿@page "/"
+@using Restaurant_site.client.Components
+@using Restaurant_site.client.DTO
 
-<PageTitle>Home</PageTitle>
+<div class="container mt-5">
+    <div class="jumbotron">
+        <h1 class="display-4">Добро пожаловать в наш ресторан!</h1>
+        <p class="lead">Наслаждайтесь лучшими блюдами и уютной атмосферой.</p>
+        <hr class="my-4">
+        <p>Посетите наше меню и узнайте о наших специальных предложениях.</p>
+        <a class="btn btn-primary btn-lg" href="#menu" role="button">Посмотреть меню</a>
+    </div>
+</div>
+<Menu />
+<div class="container" id="menu">
+    <h2>Наше меню</h2>
+    <div class="row">
+        <!-- Ваше меню -->
+    </div>
+</div>
 
-<h1 style="color:red">WellCome to Restaurant</h1>
-<img src="~/3. Леопард.jpg" alt="photo" />
+@code {
+    private bool isPanelOpen = false;
 
-
-
+    private void TogglePanel()
+    {
+        isPanelOpen = !isPanelOpen;
+    }
+}

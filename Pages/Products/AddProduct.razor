@@ -3,6 +3,8 @@
 @using Restaurant_site.client.DTO
 @using System.Net.Http.Json
 @using Restaurant_site.client.Services
+@using System.Net.Http.Headers
+@using System.Text.Json
 @inject NavigationManager _navigationManager
 
 <PageTitle>Add Product</PageTitle>
@@ -13,44 +15,47 @@
         <input id="name" class="form-control" @bind="@product.Name" required />
     </div>
     <div class="form-group">
-        <label for="name">Description:</label>
-        <input id="name" class="form-control" @bind="@product.Description" required />
+        <label for="description">Description:</label>
+        <input id="description" class="form-control" @bind="@product.Description" required />
     </div>
     <div class="form-group">
-        <label for="number">Price:</label>
-        <input id="number" class="form-control" @bind="@product.Price" required />
+        <label for="price">Price:</label>
+        <input id="price" class="form-control" @bind="@product.Price" required />
     </div>
     <div class="form-group">
-        <label for="name">Photo:</label>
-        <input id="name" class="form-control" @bind="@product.Photo" required />
+        <label for="image">Image:</label>
+        <InputFile id="image" class="form-control" OnChange="HandleFileSelected" />
     </div>
-@*     <div class="form-group">
-        <label for="photo">Photo:</label>
-        <InputFile id="photo" class="form-control" OnChange="HandleFileSelected" />
-    </div> *@
     <br />
-    <button type="button" class="btn btn-primary" @onclick="AddProducts">Add Products</button>
+    <button type="button" class="btn btn-primary" @onclick="AddProducts">Add Product</button>
 </form>
 
 @code {
-    ProductDTO product = new ProductDTO(); 
-    // string selectedImage;
+    ProductDTO product = new ProductDTO();
 
     private async Task AddProducts()
     {
-        (bool isSuccessStatusCode, ProductDTO createClient, string message) = await _apiProvider.PostAsync<ProductDTO>("product", product);
+        var (isSuccessStatusCode, createClient, message) = await _apiProvider.PostAsync<ProductDTO>("product", product);
         _navigationManager.NavigateTo("/product");
     }
-    // private async Task HandleFileSelected(InputFileChangeEventArgs e)
-    // {
-    //         var file = e.File;
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            using (var content = new MultipartFormDataContent())
+            {
+                var fileContent = new StreamContent(file.OpenReadStream());
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+                content.Add(fileContent, "file", file.Name);
 
-    //         if (file != null)
-    //         {
-    //             var buffer = new byte[file.Size];
-    //             await file.OpenReadStream().ReadAsync(buffer);
-
-    //             product.Photo = buffer;
-    //         }
-    // }
+                var response = await _apiProvider.PostAsync<object>("product/upload-image", content);
+                if (response.isSuccessStatusCode)
+                {
+                    var result = (JsonElement)response.result;
+                    product.ImageUrl = result.GetProperty("Path").GetString();
+                }
+            }
+        }
+    }
 }

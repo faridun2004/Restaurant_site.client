@@ -3,6 +3,6 @@
     public class TableDTO
     {
         public Guid Id { get; set; }
-        public string Capacity { get; set; }
+        public string? Capacity { get; set; }
     }
 }

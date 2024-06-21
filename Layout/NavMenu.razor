@@ -17,13 +17,19 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-             <NavLink class="nav-link" href="productclient">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Products
-             </NavLink>
-        </div>
-        @if (tokenProvider.IsAuthenticated)
+         @if (tokenProvider.IsAuthenticated)
         {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="productclient">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Products
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/products">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Dishes
+                </NavLink>
+            </div> 
+
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="product">
                     <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Products
@@ -56,9 +62,14 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> OrderDetails
             </NavLink>
         </div>
+        <div class="nav-item px-3">
+                <NavLink class="nav-link" href="productcategories">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> productcategories
+                </NavLink>
+            </div>
         }
         
-    </nav>
+   </nav>
 </div>
 
 @code {
@@ -71,3 +82,45 @@
         collapseNavMenu = !collapseNavMenu;
     }
 }
+
+
+
+@* <div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">ResataurantClient</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/products">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Dishes
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/dish" Match="NavLinkMatch.All">
+                <span class="oi oi-list-rich" aria-hidden="true"></span>Dish
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+} *@

@@ -1,0 +1,49 @@
+﻿@page "/order/{orderId:Guid}"
+@using Restaurant_site.client.DTO
+@using Restaurant_site.client.Services
+@inject IOrderService OrderService
+@inject NavigationManager NavigationManager
+@code {
+    [Parameter]
+    public Guid orderId { get; set; }
+    private OrderDTO? order;
+
+    protected override async Task OnInitializedAsync()
+    {
+        order = await OrderService.GetOrder(orderId);
+    }
+}
+
+<h2>Детали заказа</h2>
+
+@if (order == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <div>
+        <h4>Номер заказа: @order.Id</h4>
+        <h4>Дата заказа: @order.</h4>
+        <h4>Итоговая сумма: @order.TotalPrice Сомони</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Количество</th>
+                    <th>Цена</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in order.OrderDetails)
+                {
+                    <tr>
+                        <td>@item.CustomerId</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Quantity </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

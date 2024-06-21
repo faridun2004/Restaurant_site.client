@@ -5,36 +5,36 @@
 @using Restaurant_site.client.Services
 @inject NavigationManager _navigationManager
 
-<PageTitle>Products</PageTitle>
+<PageTitle>Блюди</PageTitle>
 
 <h1>Products</h1>
 <div class="row">
     <div class="col-md-6">
         <a href='/product/add' class="btn btn-primary" role="button">
             <i class="fas fa-user-plus"></i>
-            Add Product
+            Добавить блюди
         </a>
     </div>
     <div class="input-group col">
-        <input type="text" class="form-control" placeholder="Search product by name and by Description"
+        <input type="text" class="form-control" placeholder="Поиск товара по названию и описанию"
                @bind="SearchString" @bind:event="oninput" @onkeyup="FilterProducts" />
     </div>
 </div>
 @if (_allProducts == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Загрузка...</em></p>
 }
 else
 {
-    <table class="table">
+    <table class="table" style="color:black; background-color:aliceblue">
         <thead>
             <tr>
                 <th>Id</th>
-                <th>Name </th>
-                <th>Description.</th>
-                <th>Price</th>
-                <th>Photo</th>
-                <th>Actions</th>
+                <th>Имя </th>
+                <th>Описание.</th>
+                <th>Цена</th>
+                <th>Фото</th>
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
@@ -45,10 +45,10 @@ else
                     <td>@product.Name</td>
                     <td>@product.Description</td>
                     <td>@product.Price</td>
-                    <td>@product.Photo</td>
+                    <td>@product.ImageUrl</td>
                     <td>
-                        <button class="btn btn-primary" @onclick="() => EditItem(product.Id)">Edit</button>
-                        <button class="btn btn-danger" @onclick="() => DeleteItem(product.Id)">Delete</button>
+                        <button class="btn btn-primary" @onclick="() => EditItem(product.Id)">Редактировать</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteItem(product.Id)">Удалить</button>
                     </td>
                 </tr>
             }
@@ -59,18 +59,42 @@ else
     protected string SearchString { get; set; } = string.Empty;
     private ProductDTO[]? _allProducts;
     private ProductDTO[]? _filteredProducts;
+    private string? ErrorMessage { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
+        await LoadProducts();
+    }  
+
+    private async Task LoadProducts()
+    {
         (bool isSuccessStatusCode, _allProducts, string message) = await _apiProvider.GetAsync<ProductDTO[]>("product/AllProducts");
+        if (!isSuccessStatusCode)
+        {
+            ErrorMessage = $"Ошибка загрузки продуктов: {message}";
+        }
+        else
+        {
+            ErrorMessage = null;
+        }
         SearchString = string.Empty;
         FilterProducts();
-    }  
-    private async Task DeleteItem(Guid id)
-    {
-        (bool isSuccessStatusCode, _, string message) = await _apiProvider.DeleteAsync<string>($"product?ProductId={id}");
-        await OnInitializedAsync(); // Refresh the list
     }
-    private void EditItem(Guid id)
+
+    private async Task DeleteItem(int ProductId)
+    {
+        (bool isSuccessStatusCode, _, string message) = await _apiProvider.DeleteAsync<string>($"product?ProductId={ProductId}");
+        if (isSuccessStatusCode)
+        {
+            await LoadProducts(); // Refresh the list
+        }
+        else
+        {
+            ErrorMessage = $"Ошибка удаления продукта: {message}";
+        }
+    }
+
+    private void EditItem(int id)
     {
         _navigationManager.NavigateTo($"/product/edit/{id}", true);
     }
@@ -79,8 +103,9 @@ else
     {
         if (!string.IsNullOrEmpty(SearchString))
         {
-            _filteredProducts = _allProducts.Where(p => p.Name.Contains(SearchString) || p.Description.Contains(SearchString))
-            .ToArray();
+            _filteredProducts = _allProducts.Where(p => p.Name.Contains(SearchString, StringComparison.OrdinalIgnoreCase) 
+                                                      || p.Description.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+                                            .ToArray();
         }
         else
         {

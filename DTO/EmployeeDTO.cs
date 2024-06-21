@@ -1,4 +1,6 @@
-﻿namespace Restaurant_site.client.DTO
+﻿using Restaurant_site.client.DTO.Enums;
+
+namespace Restaurant_site.client.DTO
 {
     public class EmployeeDTO
     {

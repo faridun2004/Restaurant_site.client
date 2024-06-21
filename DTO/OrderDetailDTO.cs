@@ -4,9 +4,9 @@
     {
         public Guid Id { get; set; }
         public ProductDTO? Product { get; set; }
-        public Guid ProductId { get; set; }
+        public int ProductId { get; set; }
         public int Quantity { get; set; }
-        //public decimal TotalPrice { get; set; }
+        public decimal TotalPrice { get; set; }
         public CustomerDTO? Customer { get; set; }
         public Guid CustomerId { get; set; }
         public TableDTO? Table { get; set; }
